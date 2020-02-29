@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -41,6 +42,7 @@ public class MyService extends Service {
     public MyService() {
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onCreate() {
         nm=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
@@ -67,6 +69,7 @@ public class MyService extends Service {
                 Log.d(TAG, "onChildChanged: from service");
                 final FirebaseLocationData fld = dataSnapshot.getValue(FirebaseLocationData.class);
 
+                assert fld != null;
                 myUserRef.child(fld.getUid()).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
                     @SuppressLint("NewApi")
                     @Override
@@ -87,7 +90,7 @@ public class MyService extends Service {
                         b.putDouble("long", fld.getLongitude());
                         b.putString("name", sos_name);
                         b.putString("time",fld.getSos_time());
-                        i.putExtras(b);;
+                        i.putExtras(b);
                         nb.setAutoCancel(false);
                         PendingIntent pi =PendingIntent.getActivity(MyService.this,notification_request_code,i,PendingIntent.FLAG_UPDATE_CURRENT);
                         nb.setContentIntent(pi);

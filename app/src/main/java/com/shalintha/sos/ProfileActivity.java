@@ -32,13 +32,14 @@ public class ProfileActivity extends AppCompatActivity {
 
         mFirebaseAuth= FirebaseAuth.getInstance();
         mFirebaseuser=mFirebaseAuth.getCurrentUser();
+        assert mFirebaseuser != null;
         email.setText(mFirebaseuser.getEmail());
         email.setEnabled(false);
 
         if(mFirebaseuser.getPhoneNumber()!=null)
             phone.setText(mFirebaseuser.getPhoneNumber());
         else
-            phone.setText("91XXXXXXXX");
+            phone.setText("94XXXXXXXX");
         phone.setEnabled(false);
 
         if(mFirebaseuser.getDisplayName()!=null)

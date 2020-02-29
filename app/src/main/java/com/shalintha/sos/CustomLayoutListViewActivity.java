@@ -2,8 +2,10 @@ package com.shalintha.sos;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
+@SuppressLint("Registered")
 public class CustomLayoutListViewActivity extends AppCompatActivity {
 
     @Override

@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -210,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         childEventListener = new ChildEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String previousChildName) {
                 Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
 
 //                FirebaseLocationData fld = dataSnapshot.getValue(FirebaseLocationData.class);
@@ -219,12 +220,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String previousChildName) {
                 Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
 
 
                 final FirebaseLocationData fld = dataSnapshot.getValue(FirebaseLocationData.class);
                 Log.d(TAG, "onChildChanged: Creating Notification");
+                assert fld != null;
                 myUserRef.child(fld.getUid()).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
                     @SuppressLint("NewApi")
                     @Override
@@ -267,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
 
                 String locKey = dataSnapshot.getKey();
@@ -276,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String previousChildName) {
                 Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
                 FirebaseLocationData fld = dataSnapshot.getValue(FirebaseLocationData.class);
                 String locKey = dataSnapshot.getKey();
@@ -284,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.w(TAG, ":onCancelled", databaseError.toException());
             }
         };
@@ -301,6 +303,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+        assert service != null;
         boolean enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if (!enabled) {
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -467,12 +470,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
     }
+    @SuppressLint("SetTextI18n")
     private void updateUI(Location loc) {
         Log.d(TAG, "updateUI");
         tv.setText(Double.toString(loc.getLatitude()) + '\n' + Double.toString(loc.getLongitude()) + '\n' + DateFormat.getTimeInstance().format(loc.getTime()));
     }
     private boolean isLocationEnabled() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        assert locationManager != null;
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
@@ -487,6 +492,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
+    @SuppressLint("SetTextI18n")
     public void changeServiceState(View view) { //
 
         isServiceBackground = !isServiceBackground;

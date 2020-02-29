@@ -24,6 +24,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
         Bundle b=getIntent().getExtras();
@@ -34,8 +35,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             time = b.getString("time");
         }
     }
-
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -48,13 +47,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-
         LatLng loc = new LatLng(latitude,longitude);
         mMap.addMarker(new MarkerOptions().position(loc).title(name+" at "+time));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 10f), 4000, null);
-
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
-//        mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
     }
 }

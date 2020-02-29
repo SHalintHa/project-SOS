@@ -1,13 +1,13 @@
 package com.shalintha.sos;
 
 public class FirebaseLocationData {
-    String email;
-    double latitude;
-    double longitude;
-    String time;
-    String sos_time;
-    boolean privacy = false;
-    String uid;
+    private String email;
+    private double latitude;
+    private double longitude;
+    private String time;
+    private String sos_time;
+    private boolean privacy = false;
+    private String uid;
 
     public FirebaseLocationData(String email, double latitude, double longitude, String time, String sos_time, boolean privacy, String uid) {
         this.email = email;

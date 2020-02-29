@@ -1,5 +1,6 @@
 package com.shalintha.sos;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,7 @@ public class CustomLocationListAdapter extends ArrayAdapter {
 
     private Context mContext;
     private List<FirebaseLocationData> locationList= new ArrayList<>();
-    DatabaseReference myUserRef= FirebaseDatabase.getInstance().getReference("Users");
+    private DatabaseReference myUserRef= FirebaseDatabase.getInstance().getReference("Users");
 
     CustomLocationListAdapter(@NonNull Context context, ArrayList<FirebaseLocationData> list) {
         super(context,0,list);
@@ -48,6 +49,7 @@ public class CustomLocationListAdapter extends ArrayAdapter {
         return locationList.get(position);
     }
 
+    @SuppressLint("SetTextI18n")
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
