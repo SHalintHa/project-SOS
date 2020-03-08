@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "285299976078",
+    "firebase_url": "https://project-sos-5fbfe.firebaseio.com",
+    "project_id": "project-sos-5fbfe",
+    "storage_bucket": "project-sos-5fbfe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285299976078:android:235dbde0c3802721f926df",
+        "android_client_info": {
+          "package_name": "com.shalintha.sos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "285299976078-31l0tftumhf2f57n84pa7hluhbsg3aa7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArYmfDFlW0wjtQd0-zypxSTZS7vESIpSk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "285299976078-31l0tftumhf2f57n84pa7hluhbsg3aa7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
