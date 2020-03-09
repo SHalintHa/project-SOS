@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,12 +30,21 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,7 +59,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.util.Date;
-
+import com.google.android.gms.maps.GoogleMap;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -61,16 +71,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int notification_request_code = 100;
     FusedLocationProviderClient mFusedLocationProviderClient;
     Location lastLocation,lastLocationGpsProvider;
-
+    private Button mapButton;
 
     private static final String BACKGROUND_SERVICE_STATUS = "bgServiceStatus";
     SharedPreferences sharedpreferences;
     private String MyPREFERENCES="SOS_DATA";
     private boolean isServiceBackground;
-
+    private ImageButton emergencyButton ;
     TextView tv;
     Button b;
+    private String location_long,location_lat;
+    private GoogleMap mMap;
 
+    final LatLng TutorialsPoint = new LatLng(21 , 57);
+    //Marker TP = mMap.addMarker(new MarkerOptions()
+            //.position(TutorialsPoint).title("TutorialsPoint"));
 
     //Firebase Variables
 //    static {
@@ -94,6 +109,55 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static final String TAG = "MainActivity";
 
+    protected void executeEmergency(){
+        Toast.makeText(getApplicationContext(),"Emergency Activated",Toast.LENGTH_LONG).show();
+
+        ApiCall();
+
+
+    }
+
+    protected void ApiCall(){
+
+        final TextView textView = (TextView) findViewById(R.id.apiResponseText);
+// ...
+
+// Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url ="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=8.8670522,8.1957362&radius=7500&type=hospital&keyword=&key=AIzaSyBV1O_pdaq984Lqjf8DAe-fdpn8egV8Dtw";
+
+// Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        textView.setText("Response is: "+ response.substring(0,500));
+
+                        Log.d(TAG,response );
+
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                textView.setText("That didn't work!");
+            }
+        });
+
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+
+
+
+
+
+    }
+
+
+
+
+
     @Override
     protected void onStart() {
         gac.connect();
@@ -101,6 +165,39 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             myRef.addChildEventListener(childEventListener);
             Log.d(TAG, "onStart: ChildEventListener Attached");
         }
+
+
+
+        //Optional parameters
+
+
+
+        mapButton = (Button)findViewById(R.id.mapButton);
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+
+                Intent myIntent = new Intent(MainActivity.this, MapActivity.class);
+                myIntent.putExtra("long",location_long);
+                myIntent.putExtra("lat",location_lat);
+
+                startActivity(myIntent);
+
+            }
+        });
+
+        emergencyButton =(ImageButton)findViewById(R.id.imageButton);
+        emergencyButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+
+
+                executeEmergency();
+
+            }
+        });
+
+
 
         stopService(new Intent(this,MyService.class));
         super.onStart();
@@ -121,11 +218,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         super.onStop();
     }
-
-
-
-
-
 
 
     @SuppressLint("SetTextI18n")
@@ -262,6 +354,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 //                Toast.makeText(MainActivity.this,fld.getEmail()+" changed", Toast.LENGTH_SHORT).show();
             }
+
+
+
+
+
+
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
@@ -469,6 +567,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @SuppressLint("SetTextI18n")
     private void updateUI(Location loc) {
         Log.d(TAG, "updateUI");
+        location_lat = Double.toString(loc.getLatitude());
+        location_long = Double.toString(loc.getLongitude());
         tv.setText(Double.toString(loc.getLatitude()) + '\n' + Double.toString(loc.getLongitude()) + '\n' + DateFormat.getTimeInstance().format(loc.getTime()));
     }
     private boolean isLocationEnabled() {

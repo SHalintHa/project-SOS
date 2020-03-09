@@ -172,8 +172,40 @@
                     tools:layout_editor_absoluteX="0dp"
                     tools:layout_editor_absoluteY="141dp" />
 
+                <Button
+                    android:text="Map"
+                    android:id="@+id/mapButton"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="93dp"
+                    android:layout_height="89dp"
+                    android:backgroundTint="@color/colorAccent"
+                    android:onClick="startSos"
+
+                    tools:ignore="MissingConstraints"
+                    tools:layout_editor_absoluteX="277dp"
+                    tools:layout_editor_absoluteY="60dp" />
+
+                <TextView
+                    android:id="@+id/apiResponseText"
+                    android:layout_width="398dp"
+                    android:layout_height="596dp"
+                    android:gravity="center_horizontal"
+                    android:lineSpacingExtra="2sp"
+                    android:text="asdsadasdas"
+                    android:textAlignment="center"
+                    android:textAllCaps="true"
+                    android:textSize="12sp"
+                    android:visibility="visible"
+                    tools:ignore="HardcodedText,MissingConstraints"
+                    tools:layout_editor_absoluteX="-10dp"
+                    tools:layout_editor_absoluteY="0dp" />
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         </RelativeLayout>
     </ScrollView>
+
+
 </RelativeLayout>

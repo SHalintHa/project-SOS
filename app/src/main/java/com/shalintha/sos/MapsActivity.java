@@ -1,5 +1,6 @@
 package com.shalintha.sos;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -21,11 +22,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        Toast.makeText(getApplicationContext(),"Map View",Toast.LENGTH_LONG).show();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+
 
         Bundle b=getIntent().getExtras();
         if(b!=null) {
