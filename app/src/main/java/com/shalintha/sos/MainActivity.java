@@ -15,6 +15,8 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -29,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -58,8 +61,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import com.google.android.gms.maps.GoogleMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -82,6 +91,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     Button b;
     private String location_long,location_lat;
     private GoogleMap mMap;
+
+    ArrayList<String> PhoneList = new ArrayList<String>();
+    SmsManager smsManager = SmsManager.getDefault();
+    String locType;
+    ArrayList<String> PhoneType = new ArrayList<String>();
+    private String mapJsonData="";
+    private String jsonData="";
+
+
 
     final LatLng TutorialsPoint = new LatLng(21 , 57);
     //Marker TP = mMap.addMarker(new MarkerOptions()
@@ -109,32 +127,103 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static final String TAG = "MainActivity";
 
-    protected void executeEmergency(){
-        Toast.makeText(getApplicationContext(),"Emergency Activated",Toast.LENGTH_LONG).show();
 
-        ApiCall();
+    SmsManager smgr = SmsManager.getDefault();
+
+    protected void sendSMS(String number){
+
+
+        try {
+            smgr.sendTextMessage(number,null,"SOS",null,null);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
     }
 
-    protected void ApiCall(){
+    @Override
+    protected void onStart() {
+        gac.connect();
+        if (childEventListener != null) {
+            myRef.addChildEventListener(childEventListener);
+            Log.d(TAG, "onStart: ChildEventListener Attached");
+        }
 
+        //Optional parameters
+        requestSmsPermission();
+
+
+        mapButton = findViewById(R.id.mapButton);
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+
+                Intent myIntent = new Intent(MainActivity.this, MapActivity.class);
+                myIntent.putExtra("long",location_long);
+                myIntent.putExtra("lat",location_lat);
+                startActivity(myIntent);
+
+            }
+        });
+
+        emergencyButton =findViewById(R.id.imageButton);
+        emergencyButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+
+
+                sendSMS("+94714076576");
+                executeEmergency();
+
+            }
+        });
+
+        stopService(new Intent(this,MyService.class));
+        super.onStart();
+    }
+
+
+
+
+    protected void executeEmergency(){
+        Toast.makeText(getApplicationContext(),"Emergency Activated",Toast.LENGTH_LONG).show();
+
+        SmsManager smgr = SmsManager.getDefault();
+        //smgr.sendTextMessage("+94714076576",null,"sms message",null,null);
+        mapApiCall(6.927079,	79.861244, "hospital");
+        mapApiCall(6.927079,	79.861244, "police");
+
+        System.out.println(PhoneList.toString());
+        System.out.println("Done");
+    }
+
+    protected void mapApiCall(double  lng , double lat, final String type){
+        // locType = type;
         final TextView textView = (TextView) findViewById(R.id.apiResponseText);
-// ...
+        String url ="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" +    lng + "," + lat  +  "&radius=7500&type="+type+"&keyword=&key=AIzaSyBV1O_pdaq984Lqjf8DAe-fdpn8egV8Dtw";
 
-// Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=8.8670522,8.1957362&radius=7500&type=hospital&keyword=&key=AIzaSyBV1O_pdaq984Lqjf8DAe-fdpn8egV8Dtw";
-
-// Request a string response from the provided URL.
+        //https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJde33x7sPdkgR9bu4O8Rl0Gw&fields=name,rating,formatted_phone_number&key=AIzaSyBV1O_pdaq984Lqjf8DAe-fdpn8egV8Dtw
+        // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        textView.setText("Response is: "+ response.substring(0,500));
 
-                        Log.d(TAG,response );
+                        //textView.setText("Response is: "+ response);
+                        Log.d(TAG,response);
+                        mapJsonData=response;
+                        //System.out.println("MAP Json Data :" +mapJsonData);
+                        // System.out.println("MAP Json Data  :" +mapJsonData);
+
+                        try {
+                            mapJsonParser(mapJsonData,type);
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
 
                     }
@@ -145,63 +234,120 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
 
-// Add the request to the RequestQueue.
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        // Add the request to the RequestQueue.
         queue.add(stringRequest);
 
+        //return mapJsonData;
 
+    }
+    protected void  mapJsonParser(String jsonString ,String type) throws JSONException {
+        ArrayList<String> placeIdList = new ArrayList<String>();
 
+        JSONObject reader = new JSONObject(jsonString);
+        JSONArray results  = reader.getJSONArray("results");
+        int jsonArrayLength = results.length();
+        System.out.println("result :" +results);
+
+        for (int i=0 ;i <jsonArrayLength ; i ++){
+
+            JSONObject r1 = results.getJSONObject(i);
+            String place_id = r1.getString("place_id");
+            placeIdList.add(place_id);
+
+            String place_data =placeApiCall(place_id,type);
+            return;
+            //System.out.println("Place Data :"+ place_data);
+
+        }
+
+        //return placeIdList;
+        // JSONObject r1 = results.getJSONObject(1);
+        //String id = r1.getString("place_id");
+
+        //Log.d(TAG,id);
+        // System.out.println(id);
+        //Toast.makeText(getApplicationContext(),id,Toast.LENGTH_LONG).show();
 
 
     }
+    protected String placeApiCall(String id, final String type){
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url ="https://maps.googleapis.com/maps/api/place/details/json?place_id="+id+"&fields=name,rating,formatted_phone_number&key=AIzaSyBV1O_pdaq984Lqjf8DAe-fdpn8egV8Dtw";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        //textView.setText("Response is: "+ response);
+
+                        Log.d(TAG,response);
+
+                        jsonData=  (response);
+                        try {
+                            placeJsonParser(jsonData,type);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
 
+                        //System.out.println(jsonData);
+                        /*try {
+                            ArrayList<String> phoneList = placeJsonParser(jsonData);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        */
+                        //textView.setText("Response is: "+ mapJsonParser(response));
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG,"That didn't work!");
+            }
+        });
+
+        queue.add(stringRequest);
+        return jsonData;
 
 
+    }
+    protected void  placeJsonParser(String jsonString,String type) throws JSONException {
+        while (true){
+            JSONObject reader = new JSONObject(jsonString);
+            JSONObject results  = reader.getJSONObject("result");
+            String phone = results.getString("formatted_phone_number");
+            System.out.println(type +" Phone:" +phone);
+            Toast.makeText(getApplicationContext(),type +" Phone:" +phone,Toast.LENGTH_LONG).show();
+            PhoneList.add(phone);
+            PhoneType.add(type);
+            //sendSMS(phone);
 
-    @Override
-    protected void onStart() {
-        gac.connect();
-        if (childEventListener != null) {
-            myRef.addChildEventListener(childEventListener);
-            Log.d(TAG, "onStart: ChildEventListener Attached");
+            return;
+            //return PhoneList;
         }
 
 
-
-        //Optional parameters
-
-
-
-        mapButton = (Button)findViewById(R.id.mapButton);
-        mapButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Code here executes on main thread after user presses button
-
-                Intent myIntent = new Intent(MainActivity.this, MapActivity.class);
-                myIntent.putExtra("long",location_long);
-                myIntent.putExtra("lat",location_lat);
-
-                startActivity(myIntent);
-
-            }
-        });
-
-        emergencyButton =(ImageButton)findViewById(R.id.imageButton);
-        emergencyButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Code here executes on main thread after user presses button
-
-
-                executeEmergency();
-
-            }
-        });
-
-
-
-        stopService(new Intent(this,MyService.class));
-        super.onStart();
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     protected void onStop() {
@@ -587,6 +733,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         myRef.child(mUid).setValue(fld);
     }
 
+    private void requestSmsPermission() {
+        String permission = Manifest.permission.READ_SMS;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this,"SMS permission granted", Toast.LENGTH_SHORT).show();
+
+
+            } else {
+                Toast.makeText(MainActivity.this,"SMS permission not granted", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+
+
+
 
     @SuppressLint("SetTextI18n")
     public void changeServiceState(View view) { //
@@ -609,6 +784,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             Toast.makeText(this, "Background Notification Stopped\nYou won't get notification if app is closed\nPlease Turn it back on", Toast.LENGTH_SHORT).show();
         }
+
+
+
+
 
 
     }
