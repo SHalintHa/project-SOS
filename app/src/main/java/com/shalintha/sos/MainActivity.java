@@ -684,7 +684,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //        tv.setText("LastLocation from Deprecated: " + (ll == null ? "NO LastLocation" : ll.toString()));
 //        Log.d(TAG, "LastLocation: " + (ll == null ? "NO LastLocation" : lastLocation.toString()));
         assert ll != null;
-        updateUI(ll);
+//        updateUI(ll);
 
         LocationServices.FusedLocationApi.requestLocationUpdates(gac, locationRequest, this);
 
