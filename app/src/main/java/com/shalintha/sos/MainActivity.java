@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -87,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private String MyPREFERENCES="SOS_DATA";
     private boolean isServiceBackground;
     private ImageButton emergencyButton ;
+    private ImageButton policeButton;
+    private ImageButton hospitalButton;
     TextView tv;
     Button b;
     private String location_long,location_lat;
@@ -143,6 +146,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
+    protected void sendCall(String number){
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + number));
+        startActivity(intent);
+    }
+
     @Override
     protected void onStart() {
         gac.connect();
@@ -179,6 +188,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             }
         });
+
+        policeButton = findViewById(R.id.imageButton2);
+        policeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendSMS("+94754871491");
+                sendCall("+94754871491");
+                executeEmergency();
+            }
+        });
+
+        hospitalButton = findViewById(R.id.imageButton3);
+        hospitalButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendSMS("+94754871491");
+                sendCall("+94754871491");
+                executeEmergency();
+            }
+        });
+
 
         stopService(new Intent(this,MyService.class));
         super.onStart();

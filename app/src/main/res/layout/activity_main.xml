@@ -197,8 +197,8 @@
                     android:textSize="12sp"
                     android:visibility="visible"
                     tools:ignore="HardcodedText,MissingConstraints"
-                    tools:layout_editor_absoluteX="-10dp"
-                    tools:layout_editor_absoluteY="0dp" />
+                    tools:layout_editor_absoluteX="-18dp"
+                    tools:layout_editor_absoluteY="26dp" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
