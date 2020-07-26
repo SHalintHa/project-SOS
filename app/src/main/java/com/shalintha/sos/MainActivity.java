@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 // Code here executes on main thread after user presses button
 
 
-                sendSMS("+94714076576");
+                sendSMS("");
                 executeEmergency();
 
             }
